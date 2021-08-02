@@ -35,7 +35,7 @@ class ConvBlock(nn.Module):
         """
         c = self.conv(x)
         r = self.relu(c)
-        return r
+        return r+x
 
 
 class CNN(nn.Module):
