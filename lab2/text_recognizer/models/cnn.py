@@ -19,7 +19,9 @@ class ConvBlock(nn.Module):
     def __init__(self, input_channels: int, output_channels: int) -> None:
         super().__init__()
         self.conv = nn.Conv2d(input_channels, output_channels, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(output_channels, output_channels*2, kernel_size=3, stride=1, padding=1)
         self.bn = nn.BatchNorm2d(output_channels)
+        self.bn2 = nn.BatchNorm2d(output_channels*2)
         self.relu = nn.ReLU()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -35,11 +37,15 @@ class ConvBlock(nn.Module):
             of dimensions (B, C, H, W)
         """
         identity = x
-        c = self.conv(x)
-        c = self.bn(c)
-        r = self.relu(c)
-        r += identity
-        return r
+        c1 = self.conv(x)
+        c1 = self.bn(c1)
+        c1 = self.relu(c1)
+        
+        c2 = self.conv2(c1)
+        c2 = self.bn2(c2)
+        out = self.relu(c2)
+        out += identity
+        return out
 
 
 class CNN(nn.Module):
@@ -55,8 +61,8 @@ class CNN(nn.Module):
         conv_dim = self.args.get("conv_dim", CONV_DIM)
         fc_dim = self.args.get("fc_dim", FC_DIM)
 
-        self.conv1 = ConvBlock(input_dims[0], conv_dim)
-        self.conv2 = ConvBlock(conv_dim, conv_dim)
+        self.conv1 = ConvBlock(input_dims[0], 32)
+        self.conv2 = ConvBlock(64, 128)
         self.dropout = nn.Dropout(0.25)
         self.max_pool = nn.MaxPool2d(2)
 
@@ -81,10 +87,12 @@ class CNN(nn.Module):
         _B, _C, H, W = x.shape
         assert H == W == IMAGE_SIZE
         x = self.conv1(x)
+        print(x.shape)
         x = self.conv2(x)
         x = self.max_pool(x)
         x = self.dropout(x)
         x = torch.flatten(x, 1)
+        print(x.shape)
         x = self.fc1(x)
         x = F.relu(x)
         x = self.fc2(x)
