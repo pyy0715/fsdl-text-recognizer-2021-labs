@@ -4,9 +4,9 @@ import torch
 
 
 OPTIMIZER = "Adam"
-LR = 1e-3
+LR = 5e-4
 LOSS = "cross_entropy"
-ONE_CYCLE_TOTAL_STEPS = 100
+ONE_CYCLE_TOTAL_STEPS = 200
 
 
 class Accuracy(pl.metrics.Accuracy):

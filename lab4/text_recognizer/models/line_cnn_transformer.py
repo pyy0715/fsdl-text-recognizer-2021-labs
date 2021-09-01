@@ -10,9 +10,9 @@ from .transformer_util import PositionalEncoding, generate_square_subsequent_mas
 
 TF_DIM = 256
 TF_FC_DIM = 256
-TF_DROPOUT = 0.4
-TF_LAYERS = 4
-TF_NHEAD = 4
+TF_DROPOUT = 0.2
+TF_LAYERS = 2
+TF_NHEAD = 8
 
 
 class LineCNNTransformer(nn.Module):
@@ -79,7 +79,7 @@ class LineCNNTransformer(nn.Module):
             (Sx, B, E) logits
         """
         x = self.line_cnn(x)  # (B, E, Sx)
-        x = x * math.sqrt(self.dim)
+        x = x * math.sqrt(x.size(-1))
         x = x.permute(2, 0, 1)  # (Sx, B, E)
         x = self.pos_encoder(x)  # (Sx, B, E)
         return x
